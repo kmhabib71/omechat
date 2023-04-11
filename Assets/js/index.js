@@ -45,7 +45,7 @@ let init = async () => {
     audio: true,
   });
   document.getElementById("user-1").srcObject = localStream;
-  $.post("http://localhost:3000/get-remote-users", { omeID: omeID })
+  $.post("https://omechat.herokuapp.com/get-remote-users", { omeID: omeID })
     .done(function (data) {
       console.log(data[0]._id);
       if (data[0]) {
@@ -176,7 +176,7 @@ function onSendChannelStateChange() {
 }
 function fetchNextUser(remoteUser) {
   $.post(
-    "http://localhost:3000/get-next-user",
+    "https://omechat.herokuapp.com/get-next-user",
     { omeID: omeID, remoteUser: remoteUser },
     function (data) {
       console.log("Next user is: ", data);
