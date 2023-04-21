@@ -95,11 +95,11 @@ exports.updateOnNext = (req, res) => {
 };
 exports.remoteUserFind = (req, res) => {
   const omeID = req.body.omeID;
-
+console.log(omeID)
   UserDB.aggregate([
     {
       $match: {
-        _id: { $ne: new mongoose.Types.ObjectId(omeID) },
+        _id: { $ne: omeID },
         active: "yes",
         status: "0",
       },
