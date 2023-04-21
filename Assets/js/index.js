@@ -47,7 +47,7 @@ let init = async () => {
   document.getElementById("user-1").srcObject = localStream;
   $.post("https://omechat.herokuapp.com/get-remote-users", { omeID: omeID })
     .done(function (data) {
-      console.log(data[0]._id);
+      console.log(data);
       if (data[0]) {
         if (data[0]._id == remoteUser || data[0]._id == username) {
         } else {
