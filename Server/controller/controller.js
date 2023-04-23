@@ -99,7 +99,7 @@ console.log(omeID)
   UserDB.aggregate([
     {
       $match: {
-        _id: { $ne: omeID },
+        _id: { $ne: new mongoose.Types.ObjectId(omeID) },
         active: "yes",
         status: "0",
       },
