@@ -77,18 +77,16 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("User disconnected");
-    var disUser = userConnection.find((p) => (p.connectionId = socket.id));
-    if (disUser) {
-      userConnection = userConnection.filter(
-        (p) => (p.connectionId = !socket.id)
-      );
-      console.log(
-        "Rest users username are: ",
-        userConnection.map(function (user) {
-          return user.user_id;
-        })
-      );
-    }
+    // var disUser = userConnection.find((p) => (p.connectionId = socket.id));
+    // if (disUser) {
+    userConnection = userConnection.filter((p) => p.connectionId !== socket.id);
+    console.log(
+      "Rest users username are: ",
+      userConnection.map(function (user) {
+        return user.user_id;
+      })
+    );
+    // }
   });
   socket.on("remoteUserClosed", (data) => {
     var closedUser = userConnection.find((o) => o.user_id === data.remoteUser);
