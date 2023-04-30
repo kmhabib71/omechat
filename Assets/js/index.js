@@ -19,7 +19,7 @@ if (omeID) {
     url: "/new-user-update/" + omeID + "",
     type: "PUT",
     success: function (response) {
-      alert(response);
+      console.log(response);
     },
   });
 } else {
@@ -47,7 +47,7 @@ let init = async () => {
   document.getElementById("user-1").srcObject = localStream;
   $.post("https://omechat.herokuapp.com/get-remote-users", { omeID: omeID })
     .done(function (data) {
-      console.log(data);
+      console.log("Remoteuser id from Init() /get-remote-users: ", data[0]._id);
       if (data[0]) {
         if (data[0]._id == remoteUser || data[0]._id == username) {
         } else {
@@ -119,6 +119,7 @@ let createPeerConnection = async () => {
   };
 
   peerConnection.ondatachannel = receiveChannelCallback;
+
   // sendChannel.onmessage=onSendChannelMessageCallBack;
 };
 function sendData() {
@@ -199,6 +200,7 @@ let createOffer = async () => {
     remoteUser: remoteUser,
     offer: peerConnection.localDescription,
   });
+  console.log("from Offer");
 };
 
 let createAnswer = async (data) => {
@@ -213,6 +215,7 @@ let createAnswer = async (data) => {
     sender: data.remoteUser,
     receiver: data.username,
   });
+  console.log("from answer");
   document.querySelector(".next-chat").style.pointerEvents = "auto";
   $.ajax({
     url: "/update-on-engagement/" + username + "",
@@ -241,6 +244,18 @@ socket.on("ReceiveAnswer", function (data) {
   addAnswer(data);
 });
 socket.on("closedRemoteUser", function (data) {
+  // .................Newly Added..........................
+  const remoteStream = peerConnection.getRemoteStreams()[0];
+  remoteStream.getTracks().forEach((track) => track.stop());
+
+  peerConnection.close();
+  const remoteVid = document.getElementById("user-2");
+
+  if (remoteVid.srcObject) {
+    remoteVid.srcObject.getTracks().forEach((track) => track.stop());
+    remoteVid.srcObject = null;
+  }
+  // .................Newly Added..........................
   $.ajax({
     url: "/update-on-next/" + username + "",
     type: "PUT",
@@ -252,6 +267,7 @@ socket.on("closedRemoteUser", function (data) {
 
 socket.on("candidateReceiver", function (data) {
   peerConnection.addIceCandidate(data.iceCandidateData);
+  console.log("from candidateReceiver");
 });
 
 msgSendBtn.addEventListener("click", function (event) {
@@ -259,17 +275,69 @@ msgSendBtn.addEventListener("click", function (event) {
 });
 
 window.addEventListener("unload", function (event) {
-  $.ajax({
-    url: "/leaving-user-update/" + username + "",
-    type: "PUT",
-    success: function (response) {
-      alert(response);
-    },
-  });
+  if (navigator.userAgent.indexOf("Chrome") != -1) {
+    $.ajax({
+      url: "/leaving-user-update/" + username + "",
+      type: "PUT",
+      success: function (response) {
+        console.log(response);
+      },
+    });
+    console.log("Leaving local user is: ", username);
+    // ..........................Newly Edited
+    $.ajax({
+      url: "/update-on-otherUser-closing/" + remoteUser + "",
+      type: "PUT",
+      success: function (response) {
+        console.log(response);
+      },
+    });
+    console.log("Leaving remote user is: ", remoteUser);
+    // ..........................Newly Edited
+    console.log("This is Chrome");
+  } else if (navigator.userAgent.indexOf("Firefox") != -1) {
+    // The browser is Firefox
+    $.ajax({
+      url: "/leaving-user-update/" + username + "",
+      type: "PUT",
+      async: false,
+      success: function (response) {
+        console.log(response);
+      },
+    });
+    console.log("Leaving local user is: ", username);
+    // ..........................Newly Edited
+    $.ajax({
+      url: "/update-on-otherUser-closing/" + remoteUser + "",
+      type: "PUT",
+      async: false,
+      success: function (response) {
+        console.log(response);
+      },
+    });
+    console.log("Leaving remote user is: ", remoteUser);
+    // ..........................Newly Edited
+
+    console.log("This is Firefox");
+  } else {
+    // The browser is not Chrome or Firefox
+    console.log("This is not Chrome or Firefox");
+  }
 });
+
 async function closeConnection() {
+  // .................Newly Added..........................
+  const remoteStream = peerConnection.getRemoteStreams()[0];
+  remoteStream.getTracks().forEach((track) => track.stop());
   await peerConnection.close();
-  await socket.emit("remoteUserClosed", {
+  const remoteVid = document.getElementById("user-2");
+
+  if (remoteVid.srcObject) {
+    remoteVid.srcObject.getTracks().forEach((track) => track.stop());
+    remoteVid.srcObject = null;
+  }
+  // .................Newly Added..........................
+  socket.emit("remoteUserClosed", {
     username: username,
     remoteUser: remoteUser,
   });
@@ -280,17 +348,28 @@ async function closeConnection() {
       fetchNextUser(remoteUser);
     },
   });
+
+  console.log("From closeConnection");
 }
-document.querySelector(".next-chat").onClick = function () {
+$(document).on("click", ".next-chat", function () {
   document.querySelector(".chat-text-area").innerHTML = "";
-  if (
-    peerConnection.connectionState === "connected" ||
-    peerConnection.iceCandidateState === "connected"
-  ) {
-    closeConnection();
-    console.log("User closed");
-  } else {
-    fetchNextUser(remoteUser);
-    console.log("Moving to next user");
-  }
-};
+  // if (
+  //   peerConnection.connectionState === "connected" ||
+  //   peerConnection.iceCandidateState === "connected"
+  // ) {
+  closeConnection();
+  peerConnection.oniceconnectionstatechange = (event) => {
+    if (
+      peerConnection.iceConnectionState === "disconnected" ||
+      peerConnection.iceConnectionState === "closed"
+    ) {
+      // Peer connection is closed
+      console.log("Peer connection closed.");
+    }
+  };
+  //   console.log("User closed");
+  // } else {
+  //   fetchNextUser(remoteUser);
+  //   console.log("Moving to next user");
+  // }
+});
