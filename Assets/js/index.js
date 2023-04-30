@@ -52,9 +52,9 @@ let init = async () => {
         if (data[0]._id == remoteUser || data[0]._id == username) {
         } else {
           remoteUser = data[0]._id;
+          createOffer(data[0]._id);
         }
       }
-      createOffer();
     })
     .fail(function (xhr, textStatus, errorThrown) {
       console.log(xhr.responseText);
@@ -185,19 +185,19 @@ function fetchNextUser(remoteUser) {
         if (data[0]._id == remoteUser || data[0]._id == username) {
         } else {
           remoteUser = data[0]._id;
+          createOffer(data[0]._id);
         }
-        createOffer();
       }
     }
   );
 }
-let createOffer = async () => {
+let createOffer = async (remoteU) => {
   createPeerConnection();
   let offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
   socket.emit("offerSentToRemote", {
     username: username,
-    remoteUser: remoteUser,
+    remoteUser: remoteU,
     offer: peerConnection.localDescription,
   });
   console.log("from Offer");
