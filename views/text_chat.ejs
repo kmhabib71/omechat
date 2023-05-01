@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Omegle</title>
         <link rel="stylesheet" href="/css/style.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js" integrity="sha512-xbQU0+iHqhVt7VIXi6vBJKPh3IQBF5B84sSHdjKiSccyX/1ZI7Vnkt2/8y8uruj63/DVmCxfUNohPNruthTEQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     </head>
     <body>
         <header>
@@ -19,7 +20,12 @@
         </header>
         <main class="video_chat_main_container">
             <div class="video_chat_container" style="justify-content: center;align-items: center;background-color: lightblue;">
-
+                <div class="video-tag-container" style="display: none;">
+                    <div class="videos">
+                        <video class="video-player" id="user-1" autoplay="autoplay" playsinnline="playsinnline"></video>
+                        <video class="video-player" id="user-2" style="border-top: 2px solid white;" autoplay="autoplay" playsinnline="playsinnline"></video>
+                    </div>
+                </div>
                 <div class="chat-container">
                     <div class="chat-text-container">
                         <p>You are now chatting with a random stranger</p>
@@ -40,4 +46,7 @@
             </div>
         </main>
     </body>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    <script src="/js/index.js"></script>
+
 </html>
