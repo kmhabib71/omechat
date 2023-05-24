@@ -39,6 +39,24 @@ exports.leavingUserUpdate = (req, res) => {
       res.status(500).send({ message: "Error update user information" });
     });
 };
+exports.updateOnOtherUserClosing = (req, res) => {
+  const userid = req.params.id;
+  console.log("Leaving userid is: ", userid);
+
+  UserDB.updateOne({ _id: userid }, { $set: { active: "yes", status: "0" } })
+    .then((data) => {
+      if (!data) {
+        res.status(404).send({
+          message: `Cannot update user with ${userid} Maybe user not found!`,
+        });
+      } else {
+        res.send("1 document updated");
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({ message: "Error update user information" });
+    });
+};
 exports.newUserUpdate = (req, res) => {
   const userid = req.params.id;
   console.log("Revisited userid is: ", userid);
